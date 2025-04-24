@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Dorking Tool</title>
+    <style>
+        :root {
+            --primary: #4285F4;
+            --dark: #202124;
+            --light: #f8f9fa;
+            --danger: #EA4335;
+            --success: #34A853;
+        }
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--dark);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            text-align: center;
+        }
+        
+        header p {
+            text-align: center;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .tool-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .search-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dorks-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: var(--primary);
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        select, input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        select {
+            height: 40px;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background-color: #3367d6;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background-color: #d33434;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+        }
+        
+        .btn-success:hover {
+            background-color: #2d9249;
+        }
+        
+        .dork-categories {
+            margin-bottom: 15px;
+        }
+        
+        .dork-category {
+            margin-bottom: 10px;
+        }
+        
+        .dork-category h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .dork-category h3::before {
+            content: '+';
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        
+        .dork-category.active h3::before {
+            content: '-';
+        }
+        
+        .dork-list {
+            display: none;
+            padding-left: 20px;
+        }
+        
+        .dork-category.active .dork-list {
+            display: block;
+        }
+        
+        .dork-item {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .dork-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .results-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .tool-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Google Dorking Tool</h1>
+            <p>Search with pre-defined Google dorks for security research</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="tool-container">
+            <div class="search-section">
+                <h2>Search Parameters</h2>
+                <div class="form-group">
+                    <label for="google-dork">Dork Query</label>
+                    <input type="text" id="google-dork" placeholder="E.g., inurl:admin intitle:login">
+                </div>
+                <div class="form-group">
+                    <label for="google-site">Site (optional)</label>
+                    <input type="text" id="google-site" placeholder="example.com">
+                </div>
+                <div class="form-group">
+                    <label for="google-filetype">Filetype (optional)</label>
+                    <input type="text" id="google-filetype" placeholder="pdf, doc, xls, etc.">
+                </div>
+                <button id="google-search" class="btn-success">Search Google</button>
+                <button id="google-clear">Clear</button>
+                <button id="view-results" style="display: none;">View Results in Google</button>
+            </div>
+            
+            <div class="dorks-section">
+                <h2>Predefined Dorks</h2>
+                <div class="dork-categories">
+                    <div class="dork-category active">
+                        <h3>Login Pages & Admin Panels</h3>
+                        <div class="dork-list">
+                            <div class="dork-item" data-dork="inurl:admin">inurl:admin</div>
+                            <div class="dork-item" data-dork="inurl:login">inurl:login</div>
+                            <div class="dork-item" data-dork='intitle:"Login Page"'>intitle:"Login Page"</div>
+                            <div class="dork-item" data-dork="inurl:signin">inurl:signin</div>
+                            <div class="dork-item" data-dork="inurl:auth">inurl:auth</div>
+                            <div class="dork-item" data-dork='intitle:"admin login"'>intitle:"admin login"</div>
+                            <div class="dork-item" data-dork="inurl:dashboard">inurl:dashboard</div>
+                            <div class="dork-item" data-dork='intitle:"control panel"'>intitle:"control panel"</div>
+                            <div class="dork-item" data-dork="inurl:userlogin">inurl:userlogin</div>
+                            <div class="dork-item" data-dork="inurl:cpanel">inurl:cpanel</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dork-category">
+                        <h3>Directory Listings</h3>
+                        <div class="dork-list">
+                            <div class="dork-item" data-dork='intitle:"index of /"'>intitle:"index of /"</div>
+                            <div class="dork-item" data-dork='intitle:"index of" admin'>intitle:"index of" admin</div>
+                            <div class="dork-item" data-dork='intitle:"index of" backup'>intitle:"index of" backup</div>
+                            <div class="dork-item" data-dork='intitle:"index of" confidential'>intitle:"index of" confidential</div>
+                            <div class="dork-item" data-dork='intitle:"index of" passwords'>intitle:"index of" passwords</div>
+                            <div class="dork-item" data-dork='intitle:"index of /private"'>intitle:"index of /private"</div>
+                            <div class="dork-item" data-dork='intitle:"index of /root"'>intitle:"index of /root"</div>
+                            <div class="dork-item" data-dork='intitle:"index of /config"'>intitle:"index of /config"</div>
+                            <div class="dork-item" data-dork='intitle:"index of /db"'>intitle:"index of /db"</div>
+                            <div class="dork-item" data-dork='intitle:"index of /mail"'>intitle:"index of /mail"</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dork-category">
+                        <h3>Credential Exposure</h3>
+                        <div class="dork-list">
+                            <div class="dork-item" data-dork="filetype:log password">filetype:log password</div>
+                            <div class="dork-item" data-dork="filetype:txt password">filetype:txt password</div>
+                            <div class="dork-item" data-dork="filetype:xls password">filetype:xls password</div>
+                            <div class="dork-item" data-dork="filetype:sql password">filetype:sql password</div>
+                            <div class="dork-item" data-dork="filetype:env DB_PASSWORD">filetype:env DB_PASSWORD</div>
+                            <div class="dork-item" data-dork='intext:"password ="'>intext:"password ="</div>
+                            <div class="dork-item" data-dork='intext:"pwd="'>intext:"pwd="</div>
+                            <div class="dork-item" data-dork='intext:"user=" intext:"password="'>intext:"user=" intext:"password="</div>
+                            <div class="dork-item" data-dork='intext:"login successful"'>intext:"login successful"</div>
+                            <div class="dork-item" data-dork='intext:"Welcome back" inurl:login'>intext:"Welcome back" inurl:login</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dork-category">
+                        <h3>Public Code & Git Leaks</h3>
+                        <div class="dork-list">
+                            <div class="dork-item" data-dork="inurl:.git">inurl:.git</div>
+                            <div class="dork-item" data-dork="inurl:.svn">inurl:.svn</div>
+                            <div class="dork-item" data-dork="filetype:php inurl:config">filetype:php inurl:config</div>
+                            <div class="dork-item" data-dork="filetype:js inurl:api">filetype:js inurl:api</div>
+                            <div class="dork-item" data-dork="filetype:rb secrets">filetype:rb secrets</div>
+                            <div class="dork-item" data-dork="filetype:json">filetype:json</div>
+                            <div class="dork-item" data-dork="filetype:yaml">filetype:yaml</div>
+                            <div class="dork-item" data-dork="filetype:env">filetype:env</div>
+                            <div class="dork-item" data-dork="filetype:xml">filetype:xml</div>
+                            <div class="dork-item" data-dork="filetype:properties">filetype:properties</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dork-category">
+                        <h3>Debug & Error Info</h3>
+                        <div class="dork-list">
+                            <div class="dork-item" data-dork='intext:"PHP Parse error"'>intext:"PHP Parse error"</div>
+                            <div class="dork-item" data-dork='intext:"Warning: mysql_connect()"'>intext:"Warning: mysql_connect()"</div>
+                            <div class="dork-item" data-dork='intext:"Notice: Undefined variable"'>intext:"Notice: Undefined variable"</div>
+                            <div class="dork-item" data-dork='intext:"Fatal error"'>intext:"Fatal error"</div>
+                            <div class="dork-item" data-dork='intext:"500 Internal Server Error"'>intext:"500 Internal Server Error"</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Preparing your search...</p>
+        </div>
+        
+        <div class="results-section" id="results">
+            <h2>Search Information</h2>
+            <div id="results-container">
+                <p>Your Google search will open in a new tab when you click "View Results in Google".</p>
+                <p id="search-query-display"></p>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>Google Dorking Tool - For educational and security research purposes only</p>
+            <p>Use responsibly and comply with all applicable laws and Google's Terms of Service</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Dork category toggling
+            const dorkCategories = document.querySelectorAll('.dork-category');
+            dorkCategories.forEach(category => {
+                const heading = category.querySelector('h3');
+                heading.addEventListener('click', function() {
+                    category.classList.toggle('active');
+                });
+            });
+            
+            // Dork item selection
+            const dorkItems = document.querySelectorAll('.dork-item');
+            dorkItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const dork = this.getAttribute('data-dork');
+                    document.getElementById('google-dork').value = dork;
+                });
+            });
+            
+            // Clear button
+            document.getElementById('google-clear').addEventListener('click', function() {
+                document.getElementById('google-dork').value = '';
+                document.getElementById('google-site').value = '';
+                document.getElementById('google-filetype').value = '';
+                document.getElementById('view-results').style.display = 'none';
+                document.getElementById('search-query-display').textContent = '';
+            });
+            
+            // Search button
+            document.getElementById('google-search').addEventListener('click', function() {
+                const dork = document.getElementById('google-dork').value.trim();
+                const site = document.getElementById('google-site').value.trim();
+                const filetype = document.getElementById('google-filetype').value.trim();
+                
+                if (!dork) {
+                    alert('Please enter a search query');
+                    return;
+                }
+                
+                let query = dork;
+                if (site) {
+                    query += ` site:${site}`;
+                }
+                if (filetype) {
+                    query += ` filetype:${filetype}`;
+                }
+                
+                prepareGoogleSearch(query);
+            });
+            
+            // View Results button
+            document.getElementById('view-results').addEventListener('click', function() {
+                const query = this.getAttribute('data-query');
+                window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+            });
+            
+            function prepareGoogleSearch(query) {
+                showLoading();
+                
+                // Simulate processing (in a real app, you might validate the query here)
+                setTimeout(() => {
+                    hideLoading();
+                    
+                    // Display the query that will be used
+                    document.getElementById('search-query-display').innerHTML = `
+                        <strong>Ready to search:</strong> <code>${query}</code>
+                    `;
+                    
+                    // Set up the View Results button
+                    const viewResultsBtn = document.getElementById('view-results');
+                    viewResultsBtn.setAttribute('data-query', query);
+                    viewResultsBtn.style.display = 'inline-block';
+                }, 500);
+            }
+            
+            function showLoading() {
+                document.getElementById('loading').style.display = 'block';
+            }
+            
+            function hideLoading() {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
